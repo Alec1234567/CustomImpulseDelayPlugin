@@ -67,6 +67,8 @@ private:
     juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Linear> delay[7];
     juce::dsp::StateVariableTPTFilter<float> LPFs[8];
 
+    
+
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CustomImpulseDelayAudioProcessor)
 

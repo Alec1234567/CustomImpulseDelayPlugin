@@ -34,6 +34,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CustomImpulseDelayAudioProcessorEditor)
     juce::Slider sliders[8];
     juce::Slider filterKnobs[8];
+    juce::NormalisableRange<double> logRange{ 20.0f, 20000.0f, 1.0f, 0.2f };
 
     juce::Slider timeKnob;
 };

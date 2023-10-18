@@ -28,7 +28,7 @@ CustomImpulseDelayAudioProcessorEditor::CustomImpulseDelayAudioProcessorEditor (
     //TODO make the slider log scale
     for (int i = 0; i < sizeof(filterKnobs) / sizeof(filterKnobs[0]); i++) {
         filterKnobs[i].setSliderStyle(juce::Slider::SliderStyle::LinearBarVertical);
-        filterKnobs[i].setRange(0, 20000, 1);
+        filterKnobs[i].setNormalisableRange(logRange);
         filterKnobs[i].setValue(20000);
         filterKnobs[i].addListener(this);
         addAndMakeVisible(filterKnobs[i]);
@@ -87,7 +87,7 @@ void CustomImpulseDelayAudioProcessorEditor::resized()
     
 }
 
-//git test
+
 
 void CustomImpulseDelayAudioProcessorEditor::sliderValueChanged(juce::Slider* slider) {
 

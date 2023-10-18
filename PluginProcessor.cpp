@@ -100,6 +100,8 @@ void CustomImpulseDelayAudioProcessor::prepareToPlay (double sampleRate, int sam
     spec.maximumBlockSize = samplesPerBlock;
     spec.numChannels = getTotalNumOutputChannels();
 
+
+
     //delay times in ms
     //TODO write tempo/beat conversion to time
 
