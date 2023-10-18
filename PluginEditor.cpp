@@ -25,7 +25,7 @@ CustomImpulseDelayAudioProcessorEditor::CustomImpulseDelayAudioProcessorEditor (
     }
 
 
-    //TODO make the slider log scale
+    
     for (int i = 0; i < sizeof(filterKnobs) / sizeof(filterKnobs[0]); i++) {
         filterKnobs[i].setSliderStyle(juce::Slider::SliderStyle::LinearBarVertical);
         filterKnobs[i].setNormalisableRange(logRange);
@@ -36,10 +36,16 @@ CustomImpulseDelayAudioProcessorEditor::CustomImpulseDelayAudioProcessorEditor (
 
 
     timeKnob.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
-    timeKnob.setRange(1, 41000);
-    timeKnob.setValue(10000);
+    timeKnob.setRange(40, 200);
+    timeKnob.setValue(audioProcessor.default_tempo);
     timeKnob.addListener(this);
     addAndMakeVisible(timeKnob);
+
+    sample_ms_beat_switch.setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
+    sample_ms_beat_switch.setRange(1, 3,1);
+    sample_ms_beat_switch.addListener(this);
+    addAndMakeVisible(sample_ms_beat_switch);
+    
 }
 
 CustomImpulseDelayAudioProcessorEditor::~CustomImpulseDelayAudioProcessorEditor()
@@ -82,12 +88,17 @@ void CustomImpulseDelayAudioProcessorEditor::resized()
 
     timeKnob.setBounds(leftMargin, topMargin*2+3*sliderHeight, 100, 100);
     timeKnob.setTitle("Delay Time");
+
+    sample_ms_beat_switch.setBounds(leftMargin+2*sliderWidth, topMargin * 2 + 3 * sliderHeight, 50, 50);
     
 
     
 }
 
-
+/// <summary>
+/// ///
+/// </summary>
+/// <param name="slider"></param>
 
 void CustomImpulseDelayAudioProcessorEditor::sliderValueChanged(juce::Slider* slider) {
 
@@ -104,8 +115,12 @@ void CustomImpulseDelayAudioProcessorEditor::sliderValueChanged(juce::Slider* sl
         }
     }
     if (slider == &timeKnob) {
-        audioProcessor.base_time = timeKnob.getValue();
+        audioProcessor.base_time = audioProcessor.convert_ms_to_samples(audioProcessor.convert_tempo_to_ms(timeKnob.getValue()));
         audioProcessor.change_time_flag = true;
+    }
+
+    if (slider == &sample_ms_beat_switch) {
+        audioProcessor.sample_ms_beat = sample_ms_beat_switch.getValue();
     }
 
 }

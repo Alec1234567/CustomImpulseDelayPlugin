@@ -37,4 +37,5 @@ private:
     juce::NormalisableRange<double> logRange{ 20.0f, 20000.0f, 1.0f, 0.2f };
 
     juce::Slider timeKnob;
+    juce::Slider sample_ms_beat_switch;
 };

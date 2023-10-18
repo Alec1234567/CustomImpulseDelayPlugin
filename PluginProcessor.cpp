@@ -99,7 +99,7 @@ void CustomImpulseDelayAudioProcessor::prepareToPlay (double sampleRate, int sam
     spec.sampleRate = sampleRate;
     spec.maximumBlockSize = samplesPerBlock;
     spec.numChannels = getTotalNumOutputChannels();
-
+    sample_rate = sampleRate;
 
 
     //delay times in ms
@@ -128,6 +128,7 @@ void CustomImpulseDelayAudioProcessor::releaseResources()
 {
     // When playback stops, you can use this as an opportunity to free up any
     // spare memory, etc.
+    
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -220,6 +221,22 @@ void CustomImpulseDelayAudioProcessor::processBlock (juce::AudioBuffer<float>& b
     
 }
 
+
+//converter functions
+
+int CustomImpulseDelayAudioProcessor::convert_ms_to_samples(float ms) {
+    float samples = (ms/1000)*my_sample_rate;
+    return (int)samples;
+}
+
+float CustomImpulseDelayAudioProcessor::convert_tempo_to_ms(float bpm) {
+    float ms_per_minute = 60 * 1000;
+
+    float ms_per_beat = ms_per_minute / bpm;
+
+    return ms_per_beat;
+}
+
 //==============================================================================
 bool CustomImpulseDelayAudioProcessor::hasEditor() const
 {
@@ -251,3 +268,4 @@ juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new CustomImpulseDelayAudioProcessor();
 }
+
