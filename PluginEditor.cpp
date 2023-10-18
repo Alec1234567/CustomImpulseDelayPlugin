@@ -87,6 +87,8 @@ void CustomImpulseDelayAudioProcessorEditor::resized()
     
 }
 
+//git test
+
 void CustomImpulseDelayAudioProcessorEditor::sliderValueChanged(juce::Slider* slider) {
 
     //update parameters based on slider position
