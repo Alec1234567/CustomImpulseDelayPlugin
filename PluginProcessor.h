@@ -64,6 +64,10 @@ public:
     int sample_ms_beat;
     double my_sample_rate = 44100;
 
+    double division_value = 1;
+
+
+
     int convert_ms_to_samples(float ms);
     float convert_tempo_to_ms(float tempo);
    

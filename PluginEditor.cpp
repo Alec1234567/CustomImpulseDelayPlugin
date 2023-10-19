@@ -15,7 +15,7 @@ CustomImpulseDelayAudioProcessorEditor::CustomImpulseDelayAudioProcessorEditor (
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
-    setSize (400, 300);
+    setSize (800, 600);
     for (int i = 0; i < sizeof(sliders) / sizeof(sliders[0]); i++) {
         sliders[i].setSliderStyle(juce::Slider::SliderStyle::LinearBarVertical);
         sliders[i].setRange(0, 2, 0.01);
@@ -41,10 +41,32 @@ CustomImpulseDelayAudioProcessorEditor::CustomImpulseDelayAudioProcessorEditor (
     timeKnob.addListener(this);
     addAndMakeVisible(timeKnob);
 
+
+    division.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
+
+    //need to figure out how to get 1,2/3,1/2,1/3,1/4,1/5,1/6,1/7,1/8
+    division.setRange(1,16,1);
+    division.setValue(0);
+    division.addListener(this);
+    addAndMakeVisible(division);
+
     sample_ms_beat_switch.setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
     sample_ms_beat_switch.setRange(1, 3,1);
     sample_ms_beat_switch.addListener(this);
     addAndMakeVisible(sample_ms_beat_switch);
+
+
+    gain_exp_decay_button.setButtonText("Gain");
+    gain_exp_decay_button.setClickingTogglesState(true);
+    gain_exp_decay_button.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::aqua);
+    addAndMakeVisible(gain_exp_decay_button);
+
+    filter_exp_decay_button.setButtonText("Cutoff");
+    filter_exp_decay_button.setClickingTogglesState(true);
+    filter_exp_decay_button.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::aqua);
+    addAndMakeVisible(filter_exp_decay_button);
+
+    
     
 }
 
@@ -63,6 +85,11 @@ void CustomImpulseDelayAudioProcessorEditor::paint (juce::Graphics& g)
     g.drawFittedText ("Hello World!", getLocalBounds(), juce::Justification::centred, 1);
 }
 
+double CustomImpulseDelayAudioProcessorEditor::division_from_slider(double slider_value) {
+    //map [-8,4] to 1/8 to 4x
+    return (1/slider_value)*4;
+}
+
 void CustomImpulseDelayAudioProcessorEditor::resized()
 {
     // This is generally where you'll want to lay out the positions of any
@@ -75,9 +102,7 @@ void CustomImpulseDelayAudioProcessorEditor::resized()
     auto topMargin = getHeight() * 0.04;
     auto sliderWidth = (getWidth() - (2 * leftMargin)) / 8;
     auto sliderHeight = (getHeight() - (2 * topMargin)) / 4;
-    int width = 50;
-    int height = 100;
-
+    
     for (int i = 0; i < sizeof(sliders) / sizeof(sliders[0]); i++) {
         sliders[i].setBounds(i * sliderWidth + leftMargin, topMargin, sliderWidth, sliderHeight);
     }
@@ -91,8 +116,13 @@ void CustomImpulseDelayAudioProcessorEditor::resized()
 
     sample_ms_beat_switch.setBounds(leftMargin+2*sliderWidth, topMargin * 2 + 3 * sliderHeight, 50, 50);
     
+    division.setBounds(leftMargin + 4 * sliderWidth, topMargin * 2 + 3 * sliderHeight, 50, 50);
 
-    
+    int button_width = sliderWidth;
+    int button_height = button_width/2;
+   
+    gain_exp_decay_button.setBounds(getWidth() - (button_width + leftMargin), topMargin * 3 + 2 * sliderHeight, button_width, button_height);
+    filter_exp_decay_button.setBounds(getWidth() - (button_width + leftMargin), topMargin * 4 + 2 * sliderHeight + button_height, button_width, button_height);
 }
 
 /// <summary>
@@ -104,11 +134,48 @@ void CustomImpulseDelayAudioProcessorEditor::sliderValueChanged(juce::Slider* sl
 
     //update parameters based on slider position
 
-    for (int i = 0; i < sizeof(sliders) / sizeof(sliders[0]); i++) {
-        if (slider == &sliders[i]) {
-            audioProcessor.delayLineGains[i] = sliders[i].getValue();
+
+    //normal mode
+    if(!gain_exponential_decay_mode){
+        for (int i = 0; i < sizeof(sliders) / sizeof(sliders[0]); i++) {
+            if (slider == &sliders[i]) {
+                audioProcessor.delayLineGains[i] = sliders[i].getValue();
+            }
         }
-        
+    }
+    else { //gain exponential decay mode
+        //x1 = 0
+        //x2 = 1
+
+        //if y1 = ab^x1 and y2 = ab^x2, then
+        //b = (y2/y1)^(1/x2-x1) and a = y1/(b^x1)
+        //b = (y2/y1)^(1), a= y1/1
+
+        //first slider
+        if (slider == &sliders[0]) {
+            audioProcessor.delayLineGains[0] = sliders[0].getValue();
+        }
+
+        else if (slider == &sliders[1]) {
+            audioProcessor.delayLineGains[1] = sliders[1].getValue();
+        }
+
+        float y1 = audioProcessor.delayLineGains[0];
+        float y2 = audioProcessor.delayLineGains[1];
+
+        float b = (y2 / y1);
+        float a = y1;
+
+        for (int i = 0; i < sizeof(sliders) / sizeof(sliders[0]); i++) {
+            audioProcessor.delayLineGains[i] = a * pow(b, i);
+            sliders[i].setValue(audioProcessor.delayLineGains[i]);
+        }
+
+    }
+
+
+
+    for (int i = 0; i < sizeof(sliders) / sizeof(sliders[0]); i++) {
         if (slider == &filterKnobs[i]) {
             audioProcessor.filterCutoffs[i] = filterKnobs[i].getValue();
             audioProcessor.change_cutoff_flag = true;
@@ -123,4 +190,8 @@ void CustomImpulseDelayAudioProcessorEditor::sliderValueChanged(juce::Slider* sl
         audioProcessor.sample_ms_beat = sample_ms_beat_switch.getValue();
     }
 
+    if (slider == &division) {
+        audioProcessor.division_value = division_from_slider(division.getValue());
+        audioProcessor.change_time_flag = true;
+    }
 }

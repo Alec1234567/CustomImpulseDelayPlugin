@@ -200,7 +200,7 @@ void CustomImpulseDelayAudioProcessor::processBlock (juce::AudioBuffer<float>& b
             //set the delay time differently if things have changed
             if (change_time_flag) {
                 for (int i = 0; i < sizeof(delay) / sizeof(delay[0]); i++) {
-                    delay[i].setDelay(base_time * (i + 1));
+                    delay[i].setDelay((base_time * (i + 1))*division_value);
                     change_time_flag = false;
                 }
             }
