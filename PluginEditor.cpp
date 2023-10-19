@@ -125,10 +125,9 @@ void CustomImpulseDelayAudioProcessorEditor::resized()
     filter_exp_decay_button.setBounds(getWidth() - (button_width + leftMargin), topMargin * 4 + 2 * sliderHeight + button_height, button_width, button_height);
 }
 
-/// <summary>
-/// ///
-/// </summary>
-/// <param name="slider"></param>
+
+
+
 
 void CustomImpulseDelayAudioProcessorEditor::sliderValueChanged(juce::Slider* slider) {
 
@@ -144,33 +143,43 @@ void CustomImpulseDelayAudioProcessorEditor::sliderValueChanged(juce::Slider* sl
         }
     }
     else { //gain exponential decay mode
-        //x1 = 0
-        //x2 = 1
-
-        //if y1 = ab^x1 and y2 = ab^x2, then
-        //b = (y2/y1)^(1/x2-x1) and a = y1/(b^x1)
-        //b = (y2/y1)^(1), a= y1/1
-
-        //first slider
+     
+        //changing the first slider only changes the a value
         if (slider == &sliders[0]) {
             audioProcessor.delayLineGains[0] = sliders[0].getValue();
+            gain_exponential_parameter_a = audioProcessor.delayLineGains[0];
+            for (int i = 0; i < sizeof(sliders) / sizeof(sliders[0]); i++) {
+                audioProcessor.delayLineGains[i] = gain_exponential_parameter_a * pow(gain_exponential_parameter_b, i);
+                sliders[i].setValue(audioProcessor.delayLineGains[i]);
+            }
         }
 
-        else if (slider == &sliders[1]) {
-            audioProcessor.delayLineGains[1] = sliders[1].getValue();
+        else {
+
+            for (int i = 1; i < (sizeof(sliders) / sizeof(sliders[0])); i++) {
+
+                if (slider == &sliders[i]) {
+                    audioProcessor.delayLineGains[i] = sliders[i].getValue();
+                    float x2 = i;
+                    float y2 = audioProcessor.delayLineGains[i];
+                    float y1 = gain_exponential_parameter_a;
+                 
+                    gain_exponential_parameter_b = pow((y2 / y1), 1 / x2);
+
+                    for (int j = 0; j < sizeof(sliders) / sizeof(sliders[0]); j++) {
+
+                        audioProcessor.delayLineGains[j] = gain_exponential_parameter_a * pow(gain_exponential_parameter_b, j);
+
+
+                        //>>>>>>HERE IS THE CALL THAT CAUSES THE LOOP<<<<<<<<<
+
+                        sliders[j].setValue(audioProcessor.delayLineGains[j],juce::dontSendNotification);
+                        
+                    }
+                    
+                }
+            }
         }
-
-        float y1 = audioProcessor.delayLineGains[0];
-        float y2 = audioProcessor.delayLineGains[1];
-
-        float b = (y2 / y1);
-        float a = y1;
-
-        for (int i = 0; i < sizeof(sliders) / sizeof(sliders[0]); i++) {
-            audioProcessor.delayLineGains[i] = a * pow(b, i);
-            sliders[i].setValue(audioProcessor.delayLineGains[i]);
-        }
-
     }
 
 

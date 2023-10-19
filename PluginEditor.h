@@ -32,6 +32,16 @@ public:
 
     bool gain_exponential_decay_mode = true;
 
+    //for the exponential equations
+    float gain_exponential_parameter_a=1;
+    float gain_exponential_parameter_b=1;
+
+
+    void setGainExp(float a, float b, juce::Slider sliders[], float dataArray[]);
+
+    bool updateExpCurveFlag = false;
+
+    double maxGain = 2;
     
         
 
