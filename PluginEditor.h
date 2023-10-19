@@ -30,7 +30,7 @@ public:
     double division_from_slider(double slider_value);
 
 
-    bool gain_exponential_decay_mode = true;
+    bool gain_exponential_decay_mode = false;
 
     //for the exponential equations
     float gain_exponential_parameter_a=1;

@@ -149,7 +149,7 @@ void CustomImpulseDelayAudioProcessorEditor::sliderValueChanged(juce::Slider* sl
             audioProcessor.delayLineGains[0] = sliders[0].getValue();
             gain_exponential_parameter_a = audioProcessor.delayLineGains[0];
             for (int i = 0; i < sizeof(sliders) / sizeof(sliders[0]); i++) {
-                audioProcessor.delayLineGains[i] = gain_exponential_parameter_a * pow(gain_exponential_parameter_b, i);
+                audioProcessor.delayLineGains[i] = std::min(gain_exponential_parameter_a * pow(gain_exponential_parameter_b, i),maxGain);
                 sliders[i].setValue(audioProcessor.delayLineGains[i]);
             }
         }
@@ -168,7 +168,7 @@ void CustomImpulseDelayAudioProcessorEditor::sliderValueChanged(juce::Slider* sl
 
                     for (int j = 0; j < sizeof(sliders) / sizeof(sliders[0]); j++) {
 
-                        audioProcessor.delayLineGains[j] = gain_exponential_parameter_a * pow(gain_exponential_parameter_b, j);
+                        audioProcessor.delayLineGains[j] = std::min(gain_exponential_parameter_a * pow(gain_exponential_parameter_b, j),maxGain);
 
 
                         //>>>>>>HERE IS THE CALL THAT CAUSES THE LOOP<<<<<<<<<
